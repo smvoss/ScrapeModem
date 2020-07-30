@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  prometheus:
+    image: prom/prometheus
+    volumes:
+    - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+    - 9090:9090
+    links:
+      - scrapemodem
+  prometheus-blackbox:
+    image: prom/blackbox-exporter
+    ports:
+      - 9115:9115
+  grafana:
+    image: grafana/grafana
+    ports:
+    - 3000:3000
+    links:
+      - prometheus
+    environment:
+      - GF_INSTALL_PLUGINS=raintank-worldping-app
+    volumes:
+    - grafana:/var/lib/grafana
+    - ./deploy/grafana/datasources/prometheus.yaml:/etc/grafana/provisioning/datasources/prometheus.yaml
+    - ./deploy/grafana/dashboards/home-network.yaml:/etc/grafana/provisioning/dashboards/home-network.yaml
+    - ./deploy/grafana/dashboards/home-network.json:/var/lib/grafana/dashboards/home-network.json
+  scrapemodem:
+    build:
+      context: ./
+      dockerfile: deploy/Dockerfile
+    env_file:
+      - modem-info.env  # should include MODEM_IP, MODEM_USER, MODEM_PASSWORD
+
+volumes:
+  grafana:
