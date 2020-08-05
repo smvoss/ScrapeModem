@@ -1,0 +1,7 @@
+# Ignore standard python files
+
+__pycache__/
+*.pyc
+
+# Don't commit our env file
+modem-info.env
